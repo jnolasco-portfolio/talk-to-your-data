@@ -27,9 +27,9 @@ stay separate by design. Run every command from inside `api/` or `ui/`.
 3. **Talk** — the UI sends a question; the backend turns it into SQL, executes it against MySQL, and returns rows plus
    `metadata.content_type` (`bar` / `pie` / `line` / `table`) that tells the frontend which chart to draw.
 
-The API contract exists twice and **must be changed in both places**: Java records in `api/src/main/java/.../dto/` and
-Zod schemas in `ui/src/schemas/`. The UI parses every response with `safeParse` and throws on mismatch, so a DTO
-change without the matching schema change surfaces as a runtime "Invalid data received from the server." error.
+The API contract exists twice and **must be changed in both places**: the DTO classes in `api/src/main/java/.../dto/`
+and the Zod schemas in `ui/src/schemas/`. The UI parses every response with `safeParse` and throws on mismatch, so a
+DTO change without the matching schema change surfaces as a runtime "Invalid data received from the server." error.
 
 ## Local services
 
