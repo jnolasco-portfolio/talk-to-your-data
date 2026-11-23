@@ -26,7 +26,17 @@ Required environment variables (no defaults — the context fails to start witho
 **Tests need MySQL running** (`docker compose up -d db` first). Most test classes are `@SpringBootTest`, so they load
 the full application context and fail with "Failed to obtain JDBC Connection" without the database.
 `TalkToYourDataControllerTest` is the exception — a `@WebMvcTest` slice with mocked services, so it runs without one.
-The `*IT` classes additionally call Gemini and need live GCP credentials.
+The `*IT` classes and the two `SchemaAssistant*` classes call Gemini and need live GCP credentials — without
+Application Default Credentials they fail with "Your default credentials were not found", which is an environment
+problem, not a regression.
+
+**Re-seeding the database**: the `db` service gets an anonymous volume for `/var/lib/mysql` (the mysql image declares
+one), and the entrypoint only runs `schemas/*.sql` against an *empty* data directory. `docker compose up -d db` on an
+existing volume therefore reuses the old data and silently skips the seed scripts. To re-apply them:
+
+```bash
+docker compose up -d --force-recreate --renew-anon-volumes db
+```
 
 ## Architecture
 
@@ -79,7 +89,10 @@ Langfuse (`management.tracing.exporters.otlphttp/langfuse`).
   image stays on the 8.4 LTS line, which is what the app is developed against.
 - **Liquibase is disabled** (`spring.liquibase.enabled: false`) and `db/changelog/db.changelog-master.yaml` includes a
   `01_company_employee_schema.sql` that does not exist in the repo. Schema provisioning happens through
-  `schemas/*.sql`, which the compose file mounts into `/docker-entrypoint-initdb.d`.
+  `schemas/*.sql`, which the compose file mounts into `/docker-entrypoint-initdb.d` — `00_schemas.sql` creates the
+  `aiuser` role and the three schemas, `01`–`03` create the tables, `05_library_authors_data.sql` seeds 100 sample
+  authors that `DynamicDataServiceTest` and `DatabaseQueryToolServiceTest` assert on (row 1 is Stephen King,
+  1947-09-21).
 - **CORS is contradictory on purpose.** `CorsConfig` allows only `http://localhost:4000`, but both controllers carry
   `@CrossOrigin()`, which is what lets the Vite dev server on `:5173` call the API. Removing the annotation breaks the
   frontend.
