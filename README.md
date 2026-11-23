@@ -125,9 +125,11 @@ The UI serves on <http://localhost:5173> and talks to the API at `http://localho
 ### Tests
 
 ```bash
-cd api && ./mvnw verify      # unit + integration (Failsafe)
-cd ui  && npm run lint
+cd api && ./mvnw verify      # unit + integration (Failsafe) — needs MySQL up and GCP credentials
+cd ui  && npm run build      # type-check + bundle (there is no UI test runner yet)
 ```
+
+Known issues in both projects are tracked in [`api/CLAUDE.md`](api/CLAUDE.md) and [`ui/CLAUDE.md`](ui/CLAUDE.md).
 
 ## API surface
 
