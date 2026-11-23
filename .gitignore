@@ -1,6 +1,9 @@
 # Demo videos (portfolio assets, ~165 MB - too large for git)
 *.mov
 
+# Raw 4K screen captures; the cropped/renamed assets in screenshots/ are committed
+screenshots/raw/
+
 # Local tooling hooks, not part of the project
 .github/modernize/
 

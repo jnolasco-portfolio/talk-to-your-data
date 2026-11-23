@@ -19,6 +19,34 @@ text, tables, and charts.
 
 ---
 
+> Upload a `.sql` file, generate realistic rows with a sentence, then ask your data questions and get charts back —
+> one pipeline, one schema, no SQL hand-writing.
+
+- **Learn** — an LLM normalizes your DDL into a structured model (tables, columns, types, keys, comments), cached per
+  conversation.
+- **Generate** — *"10 authors from Spain"* becomes rows that respect the schema's types, primary keys and foreign keys.
+  The browser packages them into a downloadable ZIP of CSVs.
+- **Talk** — a question becomes SQL, is executed against MySQL, and comes back as prose, a sortable table and a
+  bar/pie/line chart.
+- **Traced** — every LLM call is observed with Micrometer and exported over OTLP to Langfuse: prompt, completion and
+  latency per conversation.
+- **Validated** — every payload the UI receives is parsed with a Zod schema; anything that does not match is rejected
+  rather than rendered.
+
+## Talk to your data
+
+![Asking "Show me top 5 author's by countries" and getting back SQL plus a bar chart](screenshots/talk-to-your-data.gif)
+
+## How it works
+
+<table>
+  <tr>
+    <td width="33%" valign="top" align="center"><img src="screenshots/01-learn-schema.png" width="300" alt="Upload DDL schema form"><br><b>1 · Learn</b><br><sub>A DDL file becomes a structured model</sub></td>
+    <td width="33%" valign="top" align="center"><img src="screenshots/02-generate-preview.png" width="300" alt="Generated rows previewed in a table"><br><b>2 · Generate</b><br><sub>Plain English becomes valid rows</sub></td>
+    <td width="33%" valign="top" align="center"><img src="screenshots/03-talk-bar.png" width="300" alt="A question answered with SQL and a bar chart"><br><b>3 · Talk</b><br><sub>A question becomes SQL, rows and a chart</sub></td>
+  </tr>
+</table>
+
 ## The problem
 
 Teams prototyping a product rarely have realistic data — and the data they *do* have rarely looks like production
@@ -34,6 +62,35 @@ This project closes both gaps with one pipeline:
 3. **Talk** — switch to the *Talk to your data* tab and ask questions about the schema. The backend converts the
    question to SQL (with a safety valve for "cannot answer this"), executes it against the live schema, and returns
    rows plus metadata. The frontend renders the answer as prose, a sortable table, and bar/pie/line charts.
+
+## Walkthrough
+
+### Data generation
+
+Upload a DDL schema, pick a table, describe the rows you want:
+
+![Data generation screen with the DDL upload form and advanced parameters](screenshots/01-learn-schema.png)
+
+The generated rows land in a sortable preview and come out as a ZIP of CSVs — one file per table:
+
+![Generated authors previewed in a table next to a Download All (.zip) button](screenshots/02-generate-preview.png)
+
+### Asking your data questions
+
+Ask in plain English. The backend answers with the SQL it ran, so you can check the reasoning:
+
+![A question answered with the generated SQL and a bar chart of authors by country](screenshots/03-talk-bar.png)
+
+The chart type is not hard-coded — the backend returns `metadata.content_type` and the frontend draws the matching
+chart:
+
+![A pie chart of the most lent genres, computed over a three-table join](screenshots/04-talk-pie.png)
+
+![A line chart of monthly loan volume between 2022 and 2024](screenshots/05-talk-line.png)
+
+Not every question is a chart. A simple lookup comes back as a table:
+
+![A table answering "What is stephen king's nationality?"](screenshots/06-talk-table.png)
 
 ## Architecture
 
@@ -157,7 +214,7 @@ Known issues in both projects are tracked in [`api/CLAUDE.md`](api/CLAUDE.md) an
 | `POST` | `/api/v1/data-conversations/questions` | Answer a question over the schema: NL → SQL → executed result, with metadata for charting. |
 
 Full request/response shapes live in [`ui/documentation/api-contract.md`](ui/documentation/api-contract.md); the
-Postman collection notes are in `api/documentation/postman-tests.md`.
+Postman collection notes are in [`api/documentation/postman-tests.md`](api/documentation/postman-tests.md).
 
 ## Design notes
 
@@ -167,12 +224,17 @@ Postman collection notes are in `api/documentation/postman-tests.md`.
   generated rows are intentionally not persisted by default.
 - **Prompts live in resources, not in code.** `.st` templates under `api/src/main/resources/prompts/` keep the
   NL → SQL and schema → JSON instructions editable without touching Java.
+- **The model is told to refuse.** The NL → SQL prompt has an explicit "cannot answer this" path, so an unanswerable
+  question returns a message instead of an invented query.
+- **The chart is the backend's choice.** `metadata.content_type` (`bar` / `pie` / `line` / `table`) decides what the
+  frontend draws, so new chart types do not need a frontend change.
 
-## Demo
+## Recordings
 
 Screen recordings of both flows are kept in the working copy of this repository (`01-data-generation.mov`,
-`02-talk-to-you-data.mov`). They are excluded from git because of their size (~165 MB).
+`02-talk-to-you-data.mov`). They are excluded from git because of their size (~165 MB); the screenshots and the
+looping GIF above are the public demo. Play them locally with `ffplay 01-data-generation.mov`.
 
 ---
 
-*Practice project — synthetic data generation and conversational analytics, built with Spring AI, React and Langfuse.*
+*Personal project — synthetic data generation and conversational analytics, built with Spring AI, React and Langfuse.*
