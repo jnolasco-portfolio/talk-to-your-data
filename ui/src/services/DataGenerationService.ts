@@ -3,7 +3,7 @@ import type { generateDataRequestSchema } from '../schemas/GenerateDataRequestSc
 import { generateDataResponseSchema } from '../schemas/GenerateDataResponseSchema';
 import type { learnDatabaseRequestSchema } from '../schemas/LearnDatabaseRequestSchema';
 import { learnDatabaseResponseSchema } from '../schemas/LearnDatabaseResponseSchema';
-import { schemaAssistantHttpClient, talkToYourDataHttpClient } from './httpClient';
+import { schemaAssistantHttpClient } from './httpClient';
 
 export type GenerateDataRequest = z.infer<typeof generateDataRequestSchema>;
 export type GenerateDataResponse = z.infer<typeof generateDataResponseSchema>;
