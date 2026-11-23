@@ -1,0 +1,9 @@
+# Demo videos (portfolio assets, ~165 MB - too large for git)
+*.mov
+
+# Local tooling hooks, not part of the project
+.github/modernize/
+
+# Sibling checkouts kept alongside this repo, not part of it
+langfuse/
+ai-synthetic-data-generator-ui-template/
