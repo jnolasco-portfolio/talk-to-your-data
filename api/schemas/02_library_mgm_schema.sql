@@ -1,4 +1,4 @@
-use library;
+use `library`;
 
 -- Create the 'Authors' table
 CREATE TABLE Authors (

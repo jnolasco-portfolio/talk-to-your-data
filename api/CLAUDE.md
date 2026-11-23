@@ -72,11 +72,11 @@ Langfuse (`management.tracing.exporters.otlphttp/langfuse`).
 
 ## Known issues
 
-- **`docker compose up -d db` currently crash-loops.** The `mysql:lts-oracle` tag now resolves to MySQL 9.x, where
-  `LIBRARY` is a reserved word (`information_schema.keywords.reserved = 1`), so `schemas/00_schemas.sql` fails on
-  `create schema library;` and the container dies with `ERROR 1064 … near 'library'`. Fix by backtick-quoting the
-  identifier in `schemas/00_schemas.sql` and `schemas/02_library_mgm_schema.sql` (`use \`library\`;`), or by pinning
-  the image to a MySQL 8.x tag.
+- **The MySQL image is pinned to `mysql:8.4` on purpose.** The `mysql:lts-oracle` tag floats: Docker Hub re-pointed it
+  at MySQL 9.7 in November 2026, where `LIBRARY` is a reserved word (`information_schema.keywords.reserved = 1`) and
+  the seed scripts fail with `ERROR 1064 … near 'library'`. The `library` identifier is now backtick-quoted in
+  `schemas/00_schemas.sql` and `schemas/02_library_mgm_schema.sql`, so the seed works on 8.x and 9.x alike — but the
+  image stays on the 8.4 LTS line, which is what the app is developed against.
 - **Liquibase is disabled** (`spring.liquibase.enabled: false`) and `db/changelog/db.changelog-master.yaml` includes a
   `01_company_employee_schema.sql` that does not exist in the repo. Schema provisioning happens through
   `schemas/*.sql`, which the compose file mounts into `/docker-entrypoint-initdb.d`.

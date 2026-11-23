@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:lts-oracle
+    image: mysql:8.4
     command: --local-infile=ON
     container_name: mysql
     restart: unless-stopped

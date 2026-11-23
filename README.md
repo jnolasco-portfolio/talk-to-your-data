@@ -37,7 +37,7 @@ This project closes both gaps with one pipeline:
 
 ## Architecture
 
-```
+```text
 ┌──────────────────────────────┐        ┌────────────────────────────────────────────┐
 │  ui/  (React 19 + Vite + TS) │        │  api/  (Spring Boot 3.5 + Spring AI)       │
 │                              │        │                                            │
@@ -63,13 +63,13 @@ latency are traceable per conversation.
 | Frontend | React 19, TypeScript 5.9, Vite 7, React Router 7, TanStack Query 5, React Hook Form, Zod, Recharts, Pico CSS, JSZip, Axios |
 | Backend | Java 21, Spring Boot 3.5, Spring AI 1.0 (Vertex AI / Gemini 2.5 Flash), Liquibase, Spring Cache, Maven |
 | Observability | Micrometer + OpenTelemetry OTLP → Langfuse 3 (Prompts, traces, latency) |
-| Data | MySQL 8 (LTS), phpMyAdmin for schema inspection |
+| Data | MySQL 8.4 (LTS, image pinned in `api/docker-compose.yaml`), phpMyAdmin for schema inspection |
 | Local infra | Docker Compose — MySQL, phpMyAdmin, Langfuse (web, worker, Postgres, ClickHouse, MinIO, Redis) |
 | Testing | JUnit 5 + Mockito (unit), Maven Failsafe (integration) |
 
 ## Repository layout
 
-```
+```text
 .
 ├── api/                 Spring Boot backend (Maven)
 │   ├── docker-compose.yaml   MySQL + phpMyAdmin + Langfuse stack
