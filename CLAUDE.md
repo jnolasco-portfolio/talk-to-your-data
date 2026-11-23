@@ -48,7 +48,6 @@ These sit next to the repo and are gitignored on purpose:
 
 - `langfuse/` — upstream clone. The backend consumes Langfuse as Docker Hub images (`docker.io/langfuse/langfuse:3`),
   never from this source tree. Do not vendor it.
-- `ai-synthetic-data-generator-ui-template/` — standalone static HTML design mockups, still their own repo.
 - `*.mov` — demo screen recordings (~165 MB).
 
 ## Git history
