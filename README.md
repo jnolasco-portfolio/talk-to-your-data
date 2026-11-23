@@ -37,20 +37,30 @@ This project closes both gaps with one pipeline:
 
 ## Architecture
 
-```text
-┌──────────────────────────────┐        ┌────────────────────────────────────────────┐
-│  ui/  (React 19 + Vite + TS) │        │  api/  (Spring Boot 3.5 + Spring AI)       │
-│                              │        │                                            │
-│  /generate  Data Generation  │ ─────▶ │  POST /api/v1/schema-assistant/learn        │
-│  /chat      Talk to your data │ ─────▶ │  POST /api/v1/schema-assistant/generate     │
-│                              │        │  POST /api/v1/data-conversations/questions  │
-│  zod validates every response│        │            │                    │             │
-└──────────────────────────────┘        │            ▼                    ▼             │
-                                        │     prompts (.st)      MySQL / schema cache│
-                                        │            │                    │             │
-                                        │            ▼                    ▼             │
-                                        │      Gemini 2.5 Flash   (OTel ──▶ Langfuse) │
-                                        └────────────────────────────────────────────┘
+```mermaid
+graph LR
+    subgraph UI["ui/ (React 19 + Vite + TS)"]
+        direction TB
+        G1["/generate\nData Generation"]
+        G2["/chat\nTalk to your data"]
+    end
+    
+    subgraph API["api/ (Spring Boot 3.5 + Spring AI)"]
+        direction TB
+        L1["POST /api/v1/schema-assistant/learn"]
+        L2["POST /api/v1/schema-assistant/generate"]
+        L3["POST /api/v1/data-conversations/questions"]
+    end
+    
+    UI <-->|HTTP calls| API
+    
+    style UI fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style API fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
+    
+    OT["Otel → Langfuse"] -->|prompts, traces, latency| LF["Langfuse 3"]
+    
+    style OT fill:#fff3e0,stroke:#fb8c00,stroke-width:2px
+    style LF fill:#e8f5e9,stroke:#388e3c,stroke-width:2px
 ```
 
 Every LLM call is observed through Micrometer and exported over OTLP to **Langfuse**, so prompts, completions and
@@ -69,19 +79,26 @@ latency are traceable per conversation.
 
 ## Repository layout
 
-```text
-.
-├── api/                 Spring Boot backend (Maven)
-│   ├── docker-compose.yaml   MySQL + phpMyAdmin + Langfuse stack
-│   ├── schemas/              DDL used to bootstrap the MySQL instance
-│   ├── src/main/resources/prompts/   Prompt templates (.st) for the LLM calls
-│   └── documentation/        Backend plan, project definition, Postman checks
-├── ui/                  React frontend (Vite)
-│   ├── src/components/       Screens, layout, charts
-│   ├── src/schemas/          Zod schemas validating every API response
-│   ├── src/services/         Axios clients + service layer
-│   └── documentation/        API contract, frontend plan, Postman checks
-└── README.md
+```mermaid
+graph TD
+    root["."]
+    api["api/\nSpring Boot backend (Maven)"]
+    ui["ui/\nReact frontend (Vite)"]
+    readme["README.md"]
+    
+    root --> api
+    root --> ui
+    root --> readme
+    
+    api --> dc["docker-compose.yaml\nMySQL + phpMyAdmin + Langfuse stack"]
+    api --> schemas["schemas/\nDDL for MySQL bootstrap"]
+    api --> prompts["src/main/resources/prompts/\n(.st prompt templates)"]
+    api --> docs["documentation/\nBackend plan, Postman checks"]
+    
+    ui --> components["src/components/\nScreens, layout, charts"]
+    ui --> schemas2["src/schemas/\nZod schemas"]
+    ui --> services["src/services/\nAxios clients + service layer"]
+    ui --> fdocs["documentation/\nAPI contract, frontend plan"]
 ```
 
 This repository was consolidated from two separate repositories (`…-api` and `…-ui`); their full commit history is
